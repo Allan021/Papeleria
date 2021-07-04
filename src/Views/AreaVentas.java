@@ -1,15 +1,21 @@
 package Views;
 
+import Helpers.Effects;
 import Helpers.ValidarInputs;
 import Model.Conexion;
 import Model.Producto;
+import Styles.BtnColorsEntred;
+import Styles.BtnColorsExited;
 import Styles.CustomUI;
 import java.awt.Color;
+import java.awt.HeadlessException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -22,7 +28,15 @@ import javax.swing.plaf.ComboBoxUI;
 public class AreaVentas extends javax.swing.JDialog {
 
     int cantidad = 0;//manejara la cantidad ingresada
+    double subTotal = 0;
+    int descuento;
 
+    /*Si la compra es menor a 500 no hay desuento
+       Si la compra es mayor a 500 y menor que 1000 el descuento sera del 5%
+       Si la compra es mayor a 1000 y menor que 2500 el descuento sera del 10%
+       Si la compra es mayor a 2500 del 12%
+       
+     */
     public AreaVentas(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
@@ -30,7 +44,7 @@ public class AreaVentas extends javax.swing.JDialog {
         estilosCombobox(listaProducto);
         PanelLista.setVisible(false);
         setLocationRelativeTo(null);//se centre al principio
-
+        decoracionBotones();
         modeloComboBox(listaProducto);
         ValidarInputs.ingresoSoloNumeros(nProductos);
 
@@ -74,7 +88,7 @@ public class AreaVentas extends javax.swing.JDialog {
         jPanel6 = new javax.swing.JPanel();
         jLabel8 = new javax.swing.JLabel();
         tipo = new javax.swing.JComboBox<>();
-        generarFactura = new javax.swing.JButton();
+        generar = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         exit = new javax.swing.JButton();
 
@@ -361,24 +375,22 @@ public class AreaVentas extends javax.swing.JDialog {
         });
         jPanel6.add(tipo);
 
-        generarFactura.setBackground(new java.awt.Color(16, 131, 213));
-        generarFactura.setFont(new java.awt.Font("Open Sans", 0, 12)); // NOI18N
-        generarFactura.setForeground(new java.awt.Color(255, 255, 255));
-        generarFactura.setText("Generar Facura");
-        generarFactura.setBorder(null);
-        generarFactura.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+        generar.setFont(new java.awt.Font("Open Sans", 0, 13)); // NOI18N
+        generar.setText("Generar Factura");
+        generar.setToolTipText("Modificar un producto");
+        generar.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseMoved(java.awt.event.MouseEvent evt) {
-                generarFacturaMouseMoved(evt);
+                generarMouseMoved(evt);
             }
         });
-        generarFactura.addMouseListener(new java.awt.event.MouseAdapter() {
+        generar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                generarFacturaMouseExited(evt);
+                generarMouseExited(evt);
             }
         });
-        generarFactura.addActionListener(new java.awt.event.ActionListener() {
+        generar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                generarFacturaActionPerformed(evt);
+                generarActionPerformed(evt);
             }
         });
 
@@ -393,12 +405,12 @@ public class AreaVentas extends javax.swing.JDialog {
                 .addGap(22, 22, 22))
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(60, 60, 60)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(generarFactura, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(19, 19, 19)))
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(73, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(generar)
+                .addGap(97, 97, 97))
             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel2Layout.createSequentialGroup()
                     .addGap(11, 11, 11)
@@ -413,9 +425,9 @@ public class AreaVentas extends javax.swing.JDialog {
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 84, Short.MAX_VALUE)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(generarFactura, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(43, 43, 43))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(generar)
+                .addGap(47, 47, 47))
             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel2Layout.createSequentialGroup()
                     .addGap(70, 70, 70)
@@ -510,6 +522,11 @@ public class AreaVentas extends javax.swing.JDialog {
         if (validarVacio(campoCodigo)) {
             mensajito(campoCodigo, "Campo codigo es obligatorio para la busqueda", "Campo codigo sin datos", 3, imagenNice("/Images/Messages/error.png", 40, 40));
 
+            return;
+        }
+//para saber si esta vacio
+        if (!hayProductosEnStock()) {
+            mensajito(null, "No hay productos en stock", "Bodega vacia", 3, imagenNice("/Images/Messages/error.png", 40, 40));
             return;
         }
 
@@ -612,16 +629,46 @@ public class AreaVentas extends javax.swing.JDialog {
         } else if (tipo.getSelectedIndex() == 1) {
             PanelLista.setVisible(true);
             panelCodigo.setVisible(false);
-            System.out.println("entre2 ");
 
         }
 
     }//GEN-LAST:event_tipoItemStateChanged
+    private boolean hayProductosEnStock() {
+        boolean haySotck = false;
+        int nProductos = 0;
+        try {
+            String senten = "SELECT * FROM productos";
 
+            Connection c = Conexion.getConnection("papeleria");
+            PreparedStatement preparedStatement = c.prepareStatement(senten);
+            ResultSet rs = preparedStatement.executeQuery(senten);
+
+            while (rs.next()) {
+                nProductos++;
+            }
+
+            if (nProductos > 0) {
+                haySotck = true;
+            } else {
+                haySotck = false;
+            }
+
+            c.close();
+        } catch (HeadlessException | SQLException x) {
+            x.printStackTrace();
+            haySotck = false;
+        }
+
+        return haySotck;
+    }
     private void tipoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tipoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_tipoActionPerformed
+    public void decoracionBotones() {
+        Effects.colorInicial(generar, BtnColorsEntred.Btnwarning);
+        Effects.darHover(generar, BtnColorsEntred.Btnwarning, BtnColorsExited.Btnwarning);
 
+    }
     private void listaProductoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_listaProductoItemStateChanged
         if (listaProducto.getSelectedIndex() == 0) {//si no hay nada lo vamos a resetear
             camposDesabilitados();
@@ -639,18 +686,6 @@ public class AreaVentas extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_listaProductoActionPerformed
 
-    private void generarFacturaMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_generarFacturaMouseMoved
-        // TODO add your handling code here:
-    }//GEN-LAST:event_generarFacturaMouseMoved
-
-    private void generarFacturaMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_generarFacturaMouseExited
-        // TODO add your handling code here:
-    }//GEN-LAST:event_generarFacturaMouseExited
-
-    private void generarFacturaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generarFacturaActionPerformed
-
-    }//GEN-LAST:event_generarFacturaActionPerformed
-
     private void campoNombreFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_campoNombreFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_campoNombreFocusGained
@@ -660,12 +695,127 @@ public class AreaVentas extends javax.swing.JDialog {
     }//GEN-LAST:event_ingresarCarritoMouseMoved
 
     private void ingresarCarritoMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ingresarCarritoMouseExited
-        quitarHover(ingresarCarrito, new Color(16,131,213));
+        quitarHover(ingresarCarrito, new Color(16, 131, 213));
     }//GEN-LAST:event_ingresarCarritoMouseExited
 
     private void ingresarCarritoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ingresarCarritoActionPerformed
-       
+        if (campoNombre.getText().equals("")) {
+            mensajito(campoNombre, "No hay productos seleccionados", "Sin productos a ingresar", 3, imagenNice("/Images/Messages/error.png", 40, 40));
+            return;
+        }
+
+        if (nProductos.getText().equals("0")) {
+            mensajito(nProductos, "La cantidad no puede ser 0", "Cantidad obligatoria", 3, imagenNice("/Images/Messages/error.png", 40, 40));
+            return;
+        }
+
+        if (!hayProductosEnStock()) {
+            mensajito(null, "No hay productos en stock", "Bodega vacia", 3, imagenNice("/Images/Messages/error.png", 40, 40));
+            return;
+        }
+
+        String mensaje = "";//solo para saber si es uno omas productos
+
+        if (parsearIntTextField(nProductos) == 1) {
+            mensaje = "¿Está seguro que quiere agregar 1 " + campoNombre.getText() + " al carrito?";
+        } else {
+            mensaje = "¿Está seguro que quiere agregar " + parsearIntTextField(nProductos) + " articulos al carrito ?";
+
+        }
+
+        int resp = JOptionPane.showConfirmDialog(null, mensaje, "Peticion para agregar un producto",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, imagenNice("/Images/Messages/pregunta.png", 40, 40));
+
+        if (resp == 0) {
+            mensajito(null, "Producto agregado al carrito", "Producto insertado", 3, imagenNice("/Images/Messages/nice.png", 40, 40));
+
+            cantidad += parsearIntTextField(nProductos);
+            subTotal += (cantidad * Double.parseDouble(campoPrecio.getText()));
+            camposDesabilitados();
+            campoCodigo.setText("");
+            listaProducto.setSelectedIndex(0);
+        }
+
+        //aca haremos el calculo de cada uno de los elementos
     }//GEN-LAST:event_ingresarCarritoActionPerformed
+
+    private void generarMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_generarMouseMoved
+
+    }//GEN-LAST:event_generarMouseMoved
+
+    private void generarMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_generarMouseExited
+
+    }//GEN-LAST:event_generarMouseExited
+
+    private void generarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generarActionPerformed
+
+        if (cantidad == 0) {
+            mensajito(null, "No hay ningun articulo en el carrito", "Carrito vacio", 3, imagenNice("/Images/Messages/error.png", 40, 40));
+            return;
+        }
+
+        int resp = JOptionPane.showConfirmDialog(null, "Presione (Si) para confirmar la compra", "Peticion para generar el Ticket",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, imagenNice("/Images/Messages/pregunta.png", 40, 40));
+
+        if (resp == 0) {
+
+            //generar los desuentos
+            if (subTotal < 500) {
+                descuento = 0;
+            } else if (subTotal >= 500 && subTotal < 1000) {
+                descuento = 5;
+            } else if (subTotal >= 1000 && subTotal < 2500) {
+                descuento = 10;
+            } else if (subTotal >= 2500) {
+                descuento = 12;
+            }
+            //total de la factura
+            double total = calcularTotal(subTotal, descuento);
+
+            if (insertarFacturaBBDD(total, subTotal, descuento, cantidad)) {
+
+                
+                mensajito(null, "Compra realizada exitosamente", "Ticket generado", 3, imagenNice("/Images/Messages/nice.png", 40, 40));
+DetallesFactura detalles = new DetallesFactura(this, true, xx);
+            } else {
+                mensajito(null, "Factura no se pudo crear", "Ticket no generado", 3, imagenNice("/Images/Messages/nice.png", 40, 40));
+
+            }
+
+        }
+    }//GEN-LAST:event_generarActionPerformed
+
+    private boolean insertarFacturaBBDD(double total, double subtotal, int descuento, int cantidad) {
+
+        boolean insertado = false;
+        String sql = "INSERT INTO papeleria VALUES(null,?,?,?,CURRENT_DATE(),CURRENT_TIME(),?)";
+        Connection c = Conexion.getConnection("papeleria");
+        try {
+            PreparedStatement ps = c.prepareStatement(sql);
+            ps.setDouble(1, subtotal);
+            ps.setInt(2, descuento);
+            ps.setDouble(3, total);
+            ps.setInt(4, cantidad);
+            int resp = ps.executeUpdate();
+
+            if (resp == 1) {
+                insertado = true;
+            } else {
+                insertado = false;
+            }
+
+        } catch (SQLException ex) {
+            insertado = false;
+        } finally {
+            try {
+                c.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return insertado;
+    }
 
     private void darHover(JComponent componente, Color color) {
         componente.setBackground(color);
@@ -742,7 +892,7 @@ public class AreaVentas extends javax.swing.JDialog {
     private javax.swing.JTextField campoNombre;
     private javax.swing.JTextField campoPrecio;
     private javax.swing.JButton exit;
-    private javax.swing.JButton generarFactura;
+    private javax.swing.JButton generar;
     private javax.swing.JButton ingresarCarrito;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
