@@ -2,6 +2,7 @@ package Views;
 
 import Helpers.Effects;
 import Helpers.ValidarInputs;
+import Model.Administrador;
 import Model.Conexion;
 import Model.Producto;
 import Styles.BtnColorsEntred;
@@ -25,11 +26,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.plaf.ComboBoxUI;
 
-public class AreaVentas extends javax.swing.JDialog {
+public class AreaVentas extends javax.swing.JFrame {
 
     int cantidad = 0;//manejara la cantidad ingresada
     double subTotal = 0;
     int descuento;
+    Administrador admin;
 
     /*Si la compra es menor a 500 no hay desuento
        Si la compra es mayor a 500 y menor que 1000 el descuento sera del 5%
@@ -37,8 +39,8 @@ public class AreaVentas extends javax.swing.JDialog {
        Si la compra es mayor a 2500 del 12%
        
      */
-    public AreaVentas(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public AreaVentas(Administrador admin) {
+        this.admin = admin;
         initComponents();
         estilosCombobox(tipo);
         estilosCombobox(listaProducto);
@@ -362,7 +364,8 @@ public class AreaVentas extends javax.swing.JDialog {
         tipo.setFont(new java.awt.Font("Open Sans", 0, 13)); // NOI18N
         tipo.setForeground(new java.awt.Color(255, 255, 255));
         tipo.setFont(new java.awt.Font("Open Sans", 0, 12)); // NOI18N
-        tipo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Busqueda Por  Codigo  ", "Busqueda Por Lista" }));
+        tipo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " Busqueda Por  Codigo  ", " Busqueda Por Lista" }));
+        tipo.setPreferredSize(new java.awt.Dimension(170, 26));
         tipo.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 tipoItemStateChanged(evt);
@@ -577,7 +580,10 @@ public class AreaVentas extends javax.swing.JDialog {
         campoPrecio.setText("0.00");
     }
     private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
+        DashBoard dash = new DashBoard(admin);
         this.dispose();
+        dash.setVisible(true);
+
     }//GEN-LAST:event_exitActionPerformed
     int xx, xy;
     private void jPanel1MouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel1MouseDragged
@@ -774,11 +780,13 @@ public class AreaVentas extends javax.swing.JDialog {
 
             if (insertarFacturaBBDD(total, subTotal, descuento, cantidad)) {
 
-                
                 mensajito(null, "Compra realizada exitosamente", "Ticket generado", 3, imagenNice("/Images/Messages/nice.png", 40, 40));
-DetallesFactura detalles = new DetallesFactura(this, true, xx);
+                DetallesFactura detalles = new DetallesFactura(this, true, 0);
+                detalles.setVisible(true);
+                subTotal=0;
+                cantidad=0;
             } else {
-                mensajito(null, "Factura no se pudo crear", "Ticket no generado", 3, imagenNice("/Images/Messages/nice.png", 40, 40));
+                mensajito(null, "Factura no se pudo crear", "Ticket no generado", 3, imagenNice("/Images/Messages/error.png", 40, 40));
 
             }
 
@@ -788,7 +796,7 @@ DetallesFactura detalles = new DetallesFactura(this, true, xx);
     private boolean insertarFacturaBBDD(double total, double subtotal, int descuento, int cantidad) {
 
         boolean insertado = false;
-        String sql = "INSERT INTO papeleria VALUES(null,?,?,?,CURRENT_DATE(),CURRENT_TIME(),?)";
+        String sql = "INSERT INTO factura VALUES(null,?,?,?,CURRENT_DATE(),CURRENT_TIME(),?)";
         Connection c = Conexion.getConnection("papeleria");
         try {
             PreparedStatement ps = c.prepareStatement(sql);
@@ -806,6 +814,7 @@ DetallesFactura detalles = new DetallesFactura(this, true, xx);
 
         } catch (SQLException ex) {
             insertado = false;
+            ex.printStackTrace();
         } finally {
             try {
                 c.close();
@@ -826,7 +835,7 @@ DetallesFactura detalles = new DetallesFactura(this, true, xx);
     }
 
     private double calcularTotal(double subtotal, int descuento) {
-        return (subtotal * descuento / 100) + subtotal;
+        return subtotal- (subtotal * descuento / 100)  ;
     }
 
     private int parsearIntTextField(JTextField j) {
@@ -844,44 +853,8 @@ DetallesFactura detalles = new DetallesFactura(this, true, xx);
         JOptionPane.showMessageDialog(object, text, title, i, icono);
     }
 
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(AreaVentas.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(AreaVentas.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(AreaVentas.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(AreaVentas.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+    
 
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                AreaVentas dialog = new AreaVentas(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel PanelLista;

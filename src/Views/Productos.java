@@ -17,6 +17,7 @@ import java.awt.HeadlessException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -53,9 +54,10 @@ public class Productos extends javax.swing.JDialog {
         tabla.getTableHeader().setFont(jLabel2.getFont());
         tabla.getTableHeader().setForeground(new Color(250, 250, 250));
         tabla.getTableHeader().setBorder(jPanel3.getBorder());
-        tabla.setBorder(jPanel3.getBorder());
+        tabla.setBorder(BorderFactory.createLineBorder(Color.white, 1));
         tabla.setSelectionBackground(new Color(140, 140, 140));
         tabla.setSelectionForeground(Color.white);
+      
     }
 
     @SuppressWarnings("unchecked")
@@ -875,21 +877,7 @@ public class Productos extends javax.swing.JDialog {
 
     }
 
-    public static void main(String args[]) {
-
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                Productos dialog = new Productos(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
+   
 
     private boolean repetido(String codigo, String campo) {
         boolean repetido = false;

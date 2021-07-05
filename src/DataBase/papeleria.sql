@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 15-06-2021 a las 10:39:58
+-- Tiempo de generación: 04-07-2021 a las 23:34:17
 -- Versión del servidor: 10.4.18-MariaDB
 -- Versión de PHP: 8.0.5
 
@@ -24,24 +24,64 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `clientes`
+-- Estructura de tabla para la tabla `administradores`
 --
 
-CREATE TABLE `clientes` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(200) NOT NULL,
-  `direccion` varchar(200) NOT NULL,
-  `telefono` varchar(20) NOT NULL,
-  `tipo` varchar(200) NOT NULL,
-  `plazo` int(23) NOT NULL
+CREATE TABLE `administradores` (
+  `id` int(14) NOT NULL,
+  `username` varchar(200) NOT NULL,
+  `password` varchar(200) NOT NULL,
+  `genero` varchar(100) NOT NULL,
+  `estado` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Volcado de datos para la tabla `clientes`
+-- Volcado de datos para la tabla `administradores`
 --
 
-INSERT INTO `clientes` (`id`, `nombre`, `direccion`, `telefono`, `tipo`, `plazo`) VALUES
-(1, 'Allan', 'La casa de el', '123-1234', 'Credito', 39);
+INSERT INTO `administradores` (`id`, `username`, `password`, `genero`, `estado`) VALUES
+(1, 'Adim2020', 'allan123', 'Masculino', 'activo'),
+(2, 'Lola Bony', 'devuelvemeALotso', 'Femenino', 'activo'),
+(3, 'root', '123', 'Masculino', 'Activo');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `detalles_facturas`
+--
+
+CREATE TABLE `detalles_facturas` (
+  `idDetalle` int(14) NOT NULL,
+  `idFactura` int(14) NOT NULL,
+  `cantidad` int(14) NOT NULL,
+  `codigoProducto` varchar(200) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `factura`
+--
+
+CREATE TABLE `factura` (
+  `idFactura` int(11) NOT NULL,
+  `subTotal` double NOT NULL,
+  `descuento` double NOT NULL,
+  `total` double NOT NULL,
+  `fechaIngresada` date NOT NULL,
+  `horaIngresada` time NOT NULL,
+  `cantidadProductos` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `factura`
+--
+
+INSERT INTO `factura` (`idFactura`, `subTotal`, `descuento`, `total`, `fechaIngresada`, `horaIngresada`, `cantidadProductos`) VALUES
+(12, 10304, 12, 11540.48, '2021-07-03', '22:08:44', 32),
+(13, 11121, 12, 9786.48, '2021-07-03', '23:30:33', 99),
+(14, 32378, 12, 28492.64, '2021-07-03', '23:31:41', 100),
+(15, 505, 5, 479.75, '2021-07-04', '13:50:44', 67);
 
 -- --------------------------------------------------------
 
@@ -50,88 +90,72 @@ INSERT INTO `clientes` (`id`, `nombre`, `direccion`, `telefono`, `tipo`, `plazo`
 --
 
 CREATE TABLE `productos` (
-  `id` int(21) NOT NULL,
-  `nombre` varchar(200) NOT NULL,
-  `descripcion` varchar(200) NOT NULL,
+  `codigo` varchar(21) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `marca` varchar(100) NOT NULL,
   `precio` double NOT NULL,
-  `proveedor` varchar(200) NOT NULL,
-  `categoria` varchar(200) NOT NULL
+  `fecha_ingreso` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `productos`
 --
 
-INSERT INTO `productos` (`id`, `nombre`, `descripcion`, `precio`, `proveedor`, `categoria`) VALUES
-(1, 'Huevo', 'asdasd', 165, 'paola', 'Proteinas');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `proveedores`
---
-
-CREATE TABLE `proveedores` (
-  `id` int(12) NOT NULL,
-  `nombre` varchar(200) NOT NULL,
-  `empresa` varchar(200) NOT NULL,
-  `costo` int(23) NOT NULL,
-  `producto` varchar(200) NOT NULL,
-  `telefono` varchar(200) NOT NULL,
-  `confiable` varchar(21) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Volcado de datos para la tabla `proveedores`
---
-
-INSERT INTO `proveedores` (`id`, `nombre`, `empresa`, `costo`, `producto`, `telefono`, `confiable`) VALUES
-(1, 'Allan', 'Proveedores Express', 18, 'La casa del wey', '312-3123', 'Si'),
-(2, 'paola', 'Paolas express', 132, 'Perro', '123-1231', 'No');
+INSERT INTO `productos` (`codigo`, `nombre`, `marca`, `precio`, `fecha_ingreso`) VALUES
+('AR12', 'Papel', 'Matel', 322, '2021-07-02'),
+('AR2', 'Cartulina', 'Big', 5, '2021-07-03'),
+('AR44', 'Lapiz', 'Big', 32, '2021-07-04'),
+('AR45', 'Lapiz tinta', 'Big', 5, '2021-07-04');
 
 --
 -- Índices para tablas volcadas
 --
 
 --
--- Indices de la tabla `clientes`
+-- Indices de la tabla `administradores`
 --
-ALTER TABLE `clientes`
+ALTER TABLE `administradores`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `detalles_facturas`
+--
+ALTER TABLE `detalles_facturas`
+  ADD PRIMARY KEY (`idDetalle`);
+
+--
+-- Indices de la tabla `factura`
+--
+ALTER TABLE `factura`
+  ADD PRIMARY KEY (`idFactura`);
 
 --
 -- Indices de la tabla `productos`
 --
 ALTER TABLE `productos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indices de la tabla `proveedores`
---
-ALTER TABLE `proveedores`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`codigo`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
 --
 
 --
--- AUTO_INCREMENT de la tabla `clientes`
+-- AUTO_INCREMENT de la tabla `administradores`
 --
-ALTER TABLE `clientes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+ALTER TABLE `administradores`
+  MODIFY `id` int(14) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT de la tabla `productos`
+-- AUTO_INCREMENT de la tabla `detalles_facturas`
 --
-ALTER TABLE `productos`
-  MODIFY `id` int(21) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+ALTER TABLE `detalles_facturas`
+  MODIFY `idDetalle` int(14) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de la tabla `proveedores`
+-- AUTO_INCREMENT de la tabla `factura`
 --
-ALTER TABLE `proveedores`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE `factura`
+  MODIFY `idFactura` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

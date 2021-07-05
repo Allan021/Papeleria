@@ -365,6 +365,9 @@ public class DashBoard extends javax.swing.JFrame {
                 .addContainerGap(24, Short.MAX_VALUE))
         );
 
+        jMenuBar1.setBackground(new java.awt.Color(51, 51, 51));
+
+        acciones.setForeground(new java.awt.Color(255, 255, 255));
         acciones.setText("Acciones");
         acciones.setFont(new java.awt.Font("Open Sans", 0, 12)); // NOI18N
 
@@ -402,10 +405,16 @@ public class DashBoard extends javax.swing.JFrame {
 
     private void btnVEntasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVEntasActionPerformed
      
+        AreaVentas area = new AreaVentas(administrador);
+        this.dispose();
+        area.setVisible(true);
+        this.setVisible(true);
     }//GEN-LAST:event_btnVEntasActionPerformed
 
     private void btnVentasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVentasActionPerformed
- 
+       HistorialFacturas historial = new HistorialFacturas(this, true);
+       this.dispose();
+       historial.setVisible(true);
     }//GEN-LAST:event_btnVentasActionPerformed
 
     private void btnProductosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProductosActionPerformed
@@ -422,14 +431,7 @@ public class DashBoard extends javax.swing.JFrame {
        log.setVisible(true);
     }//GEN-LAST:event_LogOutActionPerformed
 
-    public static void main(String args[]) {
-
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new DashBoard(new Administrador("ADMIN2021 ", "AVA2", "Masculino", "Activo")).setVisible(true);
-            }
-        });
-    }
+    
 
     public Icon imagenNice(String path, int ancho, int alto) {
         Icon imagen = new ImageIcon(new ImageIcon(getClass().getResource(path)).getImage().
